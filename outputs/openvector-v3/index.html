@@ -265,8 +265,6 @@
       .infinity-path {
         stroke: rgba(23, 24, 39, 0.48);
         stroke-width: 2.4;
-        stroke-dasharray: 1 2;
-        stroke-dashoffset: 1;
       }
 
       .trace-head {
@@ -401,9 +399,6 @@
           scroll-behavior: auto !important;
         }
 
-        .infinity-path {
-          stroke-dashoffset: 0 !important;
-        }
       }
     </style>
   </head>
@@ -423,7 +418,7 @@
             <div class="scroll-trace" aria-hidden="true">
               <svg viewBox="90 90 820 360">
                 <path class="infinity-ghost"></path>
-                <path class="infinity-path" pathLength="1"></path>
+                <path class="infinity-path"></path>
                 <circle class="trace-head" r="5" cx="776" cy="110"></circle>
               </svg>
             </div>
@@ -442,68 +437,73 @@
         const ghost = document.querySelector(".infinity-ghost");
         const path = document.querySelector(".infinity-path");
         const head = document.querySelector(".trace-head");
-        const intro = document.querySelector(".intro-stage");
-        if (!ghost || !path || !head || !intro) {
+        if (!ghost || !path || !head) {
           return;
         }
 
-        const buildInfinityPath = () => {
-          const centerX = 500;
-          const centerY = 270;
-          const radiusX = 390;
-          const radiusY = 160;
-          const start = Math.PI / 4;
-          const segments = 260;
-          const points = [];
+        const centerX = 500;
+        const centerY = 270;
+        const radiusX = 390;
+        const radiusY = 160;
+        const start = Math.PI / 4;
+        const segments = 260;
 
-          for (let index = 0; index <= segments; index += 1) {
-            const t = start - (Math.PI * 2 * index) / segments;
-            const x = centerX + radiusX * Math.sin(t);
-            const y = centerY - radiusY * Math.sin(2 * t);
-            points.push(`${index === 0 ? "M" : "L"} ${x.toFixed(2)} ${y.toFixed(2)}`);
-          }
-
-          return points.join(" ");
+        const pointAt = (progress) => {
+          const t = start - Math.PI * 2 * progress;
+          return {
+            x: centerX + radiusX * Math.sin(t),
+            y: centerY - radiusY * Math.sin(2 * t),
+          };
         };
 
-        const infinityPath = buildInfinityPath();
-        ghost.setAttribute("d", infinityPath);
-        path.setAttribute("d", infinityPath);
+        const commands = [];
+        for (let index = 0; index <= segments; index += 1) {
+          const point = pointAt(index / segments);
+          commands.push(`${index === 0 ? "M" : "L"} ${point.x.toFixed(2)} ${point.y.toFixed(2)}`);
+        }
+
+        ghost.setAttribute("d", commands.join(" "));
+
+        let trailCount = -1;
+        const setTrail = (progress) => {
+          const count = Math.max(1, Math.round(segments * progress));
+          if (count !== trailCount) {
+            trailCount = count;
+            path.setAttribute("d", commands.slice(0, count + 1).join(" "));
+          }
+        };
+
+        const setHead = (progress) => {
+          const point = pointAt(progress);
+          head.setAttribute("cx", point.x.toFixed(2));
+          head.setAttribute("cy", point.y.toFixed(2));
+        };
 
         const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-        const length = path.getTotalLength();
+        if (prefersReducedMotion) {
+          setTrail(1);
+          setHead(0.15);
+          head.classList.add("is-visible");
+          return;
+        }
 
-        const drawDuration = prefersReducedMotion ? 1 : 2600;
+        const drawDuration = 2600;
         const orbitDuration = 4200;
         const startTime = performance.now();
         let orbitStartTime = null;
 
         const tick = (now) => {
-          if (prefersReducedMotion) {
-            path.style.strokeDashoffset = 0;
-            head.classList.add("is-visible");
-            const orbitPoint = path.getPointAtLength(length * 0.15);
-            head.setAttribute("cx", orbitPoint.x);
-            head.setAttribute("cy", orbitPoint.y);
-            return;
-          }
-
           const elapsed = now - startTime;
           const drawProgress = Math.min(elapsed / drawDuration, 1);
-          path.style.strokeDashoffset = 1 - drawProgress;
+          setTrail(drawProgress);
 
           if (drawProgress < 1) {
-            const point = path.getPointAtLength(length * drawProgress);
-            head.setAttribute("cx", point.x);
-            head.setAttribute("cy", point.y);
+            setHead(drawProgress);
           } else {
             if (orbitStartTime === null) {
               orbitStartTime = now;
             }
-            const orbitProgress = ((now - orbitStartTime) / orbitDuration) % 1;
-            const orbitPoint = path.getPointAtLength(length * orbitProgress);
-            head.setAttribute("cx", orbitPoint.x);
-            head.setAttribute("cy", orbitPoint.y);
+            setHead(((now - orbitStartTime) / orbitDuration) % 1);
           }
 
           head.classList.add("is-visible");
