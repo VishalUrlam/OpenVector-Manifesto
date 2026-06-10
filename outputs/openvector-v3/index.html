@@ -8,6 +8,12 @@
       name="description"
       content="OpenVector is a frontier multimodal reliability lab solving VLM hallucination."
     >
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    >
     <style>
       :root {
         --surface: #f3eee4;
@@ -35,7 +41,7 @@
           radial-gradient(circle at 86% 12%, rgba(23, 24, 39, 0.03), transparent 26rem),
           radial-gradient(circle at 83% 78%, rgba(23, 24, 39, 0.025), transparent 31rem),
           linear-gradient(180deg, #faf5ea 0%, var(--surface-low) 47%, var(--surface) 100%);
-        font-family: Pilanta, Bahnschrift, "DIN Alternate", "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+        font-family: "Barlow Semi Condensed", Bahnschrift, "DIN Alternate", "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
         font-size: 18px;
         line-height: 1.64;
         letter-spacing: 0.01em;
@@ -259,9 +265,8 @@
       .infinity-path {
         stroke: rgba(23, 24, 39, 0.48);
         stroke-width: 2.4;
-        stroke-dasharray: 1;
+        stroke-dasharray: 1 2;
         stroke-dashoffset: 1;
-        transition: stroke-dashoffset 80ms linear;
       }
 
       .trace-head {
@@ -278,7 +283,7 @@
         margin: 0 0 6px;
         font-size: clamp(52px, 7vw, 82px);
         line-height: 0.98;
-        font-weight: 400;
+        font-weight: 600;
         letter-spacing: 0;
       }
 
@@ -418,7 +423,7 @@
             <div class="scroll-trace" aria-hidden="true">
               <svg viewBox="90 90 820 360">
                 <path class="infinity-ghost"></path>
-                <path class="infinity-path"></path>
+                <path class="infinity-path" pathLength="1"></path>
                 <circle class="trace-head" r="5" cx="776" cy="110"></circle>
               </svg>
             </div>
@@ -467,8 +472,6 @@
 
         const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
         const length = path.getTotalLength();
-        path.style.strokeDasharray = length;
-        path.style.strokeDashoffset = length;
 
         const drawDuration = prefersReducedMotion ? 1 : 2600;
         const orbitDuration = 4200;
@@ -487,11 +490,10 @@
 
           const elapsed = now - startTime;
           const drawProgress = Math.min(elapsed / drawDuration, 1);
-          const drawLength = length * drawProgress;
-          path.style.strokeDashoffset = length - drawLength;
+          path.style.strokeDashoffset = 1 - drawProgress;
 
           if (drawProgress < 1) {
-            const point = path.getPointAtLength(drawLength);
+            const point = path.getPointAtLength(length * drawProgress);
             head.setAttribute("cx", point.x);
             head.setAttribute("cy", point.y);
           } else {
