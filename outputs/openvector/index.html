@@ -52,7 +52,6 @@
       .page {
         position: relative;
         min-height: 100vh;
-        overflow: hidden;
       }
 
       .page::before,
@@ -212,33 +211,52 @@
         left: -30px;
       }
 
-      .hero {
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+
+      .intro-stage {
         position: relative;
+        z-index: 2;
+        min-height: 188vh;
+      }
+
+      .hero {
+        position: sticky;
+        top: 0;
         z-index: 2;
         min-height: 100vh;
         display: grid;
-        align-items: end;
+        align-items: center;
         justify-items: center;
-        padding: 124px 24px 42px;
+        padding: 108px 24px 58px;
         text-align: center;
       }
 
       .hero-inner {
         position: relative;
-        z-index: 2;
+        z-index: 3;
         width: min(900px, 100%);
         animation: hero-rise 900ms cubic-bezier(0.16, 1, 0.3, 1) both;
       }
 
       .scroll-trace {
-        position: fixed;
-        z-index: 1;
-        top: 4vh;
+        position: absolute;
+        z-index: 2;
+        top: 48%;
         left: 50%;
-        width: min(1050px, 116vw);
-        height: min(560px, 72vh);
-        opacity: 0.46;
-        transform: translateX(-50%);
+        width: min(980px, 94vw);
+        height: min(540px, 60vh);
+        opacity: 0.74;
+        transform: translate(-50%, -50%);
         pointer-events: none;
       }
 
@@ -256,14 +274,14 @@
       }
 
       .infinity-ghost {
-        stroke: rgba(23, 24, 39, 0.08);
+        stroke: rgba(23, 24, 39, 0.065);
         stroke-width: 1.5;
         stroke-dasharray: 2 18;
       }
 
       .infinity-path {
-        stroke: rgba(23, 24, 39, 0.42);
-        stroke-width: 2.2;
+        stroke: rgba(23, 24, 39, 0.48);
+        stroke-width: 2.4;
         stroke-dasharray: 1;
         stroke-dashoffset: 1;
         transition: stroke-dashoffset 80ms linear;
@@ -279,17 +297,22 @@
         opacity: 1;
       }
 
-      h1 {
-        margin: 0 0 7px;
-        font-size: clamp(48px, 7.3vw, 73px);
-        line-height: 0.98;
+      .logo-wordmark {
+        fill: var(--ink);
+        font-family: Pilanta, Bahnschrift, "DIN Alternate", "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+        font-size: 82px;
         font-weight: 400;
-        letter-spacing: 0;
+        letter-spacing: 0.01em;
+        opacity: 1;
+      }
+
+      .logo-wordmark.is-visible {
+        opacity: 1;
       }
 
       .tagline {
-        margin: 0 auto;
-        max-width: 920px;
+        margin: clamp(250px, 36vh, 330px) auto 0;
+        max-width: 760px;
         color: var(--muted);
         font-size: clamp(18px, 2.1vw, 24px);
         line-height: 1.35;
@@ -302,7 +325,7 @@
         z-index: 2;
         width: min(770px, calc(100% - 40px));
         margin: 0 auto;
-        padding: 32px 0 96px;
+        padding: 80px 0 96px;
       }
 
       p {
@@ -406,24 +429,29 @@
         }
 
         .hero {
-          min-height: 78vh;
-          padding-bottom: 34px;
+          min-height: 100vh;
+          padding: 92px 20px 46px;
         }
 
-        h1 {
-          font-size: clamp(43px, 14vw, 62px);
-        }
-
-        .tagline {
-          font-size: 18px;
+        .intro-stage {
+          min-height: 176vh;
         }
 
         .scroll-trace {
-          top: 7vh;
-          left: 47%;
-          width: 122vw;
-          height: 52vh;
-          opacity: 0.38;
+          top: 46%;
+          left: 50%;
+          width: 118vw;
+          height: 45vh;
+          opacity: 0.68;
+        }
+
+        .logo-wordmark {
+          font-size: 94px;
+        }
+
+        .tagline {
+          margin-top: clamp(200px, 30vh, 255px);
+          font-size: 18px;
         }
 
         .belief {
@@ -470,22 +498,24 @@
       <span class="cloud six" aria-hidden="true"></span>
       <span class="cloud seven" aria-hidden="true"></span>
 
-      <div class="scroll-trace" aria-hidden="true">
-        <svg viewBox="0 0 1000 560">
-          <path class="infinity-ghost"></path>
-          <path class="infinity-path"></path>
-          <circle class="trace-head" r="5" cx="776" cy="110"></circle>
-        </svg>
-      </div>
-
-      <header class="hero">
-        <div class="hero-inner">
-          <h1>OpenVector</h1>
-          <p class="tagline">
-            OpenVector is a frontier multimodal reliability lab solving VLM hallucination.
-          </p>
-        </div>
-      </header>
+      <section class="intro-stage" aria-label="OpenVector introduction">
+        <header class="hero">
+          <div class="scroll-trace" aria-hidden="true">
+            <svg viewBox="0 0 1000 560">
+              <path class="infinity-ghost"></path>
+              <path class="infinity-path"></path>
+              <text class="logo-wordmark" x="500" y="294" text-anchor="middle">Open Vector</text>
+              <circle class="trace-head" r="5" cx="776" cy="110"></circle>
+            </svg>
+          </div>
+          <div class="hero-inner">
+            <h1 class="sr-only">Open Vector</h1>
+            <p class="tagline">
+              A frontier multimodal reliability lab solving VLM hallucination.
+            </p>
+          </div>
+        </header>
+      </section>
 
       <main>
         <p class="lead">
@@ -566,7 +596,9 @@
         const ghost = document.querySelector(".infinity-ghost");
         const path = document.querySelector(".infinity-path");
         const head = document.querySelector(".trace-head");
-        if (!ghost || !path || !head) {
+        const wordmark = document.querySelector(".logo-wordmark");
+        const intro = document.querySelector(".intro-stage");
+        if (!ghost || !path || !head || !wordmark || !intro) {
           return;
         }
 
@@ -601,12 +633,14 @@
         const setProgress = () => {
           if (prefersReducedMotion) {
             path.style.strokeDashoffset = 0;
+            wordmark.classList.add("is-visible");
             head.classList.remove("is-visible");
             return;
           }
 
-          const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-          const rawProgress = maxScroll > 0 ? window.scrollY / maxScroll : 0;
+          const introTop = intro.offsetTop;
+          const introScrollable = Math.max(intro.offsetHeight - window.innerHeight, 1);
+          const rawProgress = (window.scrollY - introTop) / introScrollable;
           const progress = Math.min(Math.max(rawProgress, 0), 1);
           const drawLength = length * progress;
           path.style.strokeDashoffset = length - drawLength;
@@ -615,6 +649,7 @@
           head.setAttribute("cx", point.x);
           head.setAttribute("cy", point.y);
           head.classList.toggle("is-visible", progress < 0.995);
+          wordmark.classList.toggle("is-visible", progress > 0.68);
         };
 
         let ticking = false;
