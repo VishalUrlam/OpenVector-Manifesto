@@ -39,7 +39,6 @@
         font-size: 18px;
         line-height: 1.64;
         letter-spacing: 0.01em;
-        overflow: hidden;
       }
 
       a {
@@ -52,8 +51,6 @@
         position: relative;
         min-height: 100vh;
         min-height: 100dvh;
-        height: 100vh;
-        height: 100dvh;
         overflow: hidden;
       }
 
@@ -118,7 +115,7 @@
         --drift-x: 32px;
         --drift-y: 10px;
         --tilt: -2deg;
-        top: 34px;
+        top: 4%;
         left: -25px;
       }
 
@@ -130,7 +127,7 @@
         --drift-x: 42px;
         --drift-y: -6px;
         --tilt: 1deg;
-        top: 205px;
+        top: 24%;
         left: -47px;
       }
 
@@ -142,8 +139,8 @@
         --drift-x: -26px;
         --drift-y: 8px;
         --tilt: 2deg;
-        top: 222px;
-        left: 52%;
+        top: 12%;
+        left: 64%;
       }
 
       .cloud.four {
@@ -154,8 +151,8 @@
         --drift-x: 34px;
         --drift-y: -10px;
         --tilt: -1deg;
-        top: 472px;
-        left: 9%;
+        top: 58%;
+        left: 4%;
       }
 
       .cloud.five {
@@ -166,8 +163,8 @@
         --drift-x: -38px;
         --drift-y: 12px;
         --tilt: 2deg;
-        top: 545px;
-        right: 24%;
+        top: 68%;
+        right: 8%;
       }
 
       .cloud.six {
@@ -178,7 +175,7 @@
         --drift-x: -44px;
         --drift-y: -8px;
         --tilt: -2deg;
-        bottom: 70px;
+        bottom: 6%;
         right: -20px;
       }
 
@@ -190,7 +187,7 @@
         --drift-x: 30px;
         --drift-y: 14px;
         --tilt: 2deg;
-        top: 1060px;
+        bottom: 10%;
         left: -30px;
       }
 
@@ -209,17 +206,15 @@
       .intro-stage {
         position: relative;
         z-index: 2;
-        min-height: 100%;
-        height: 100%;
       }
 
       .hero {
         position: relative;
         z-index: 2;
-        min-height: 100%;
-        height: 100%;
+        min-height: 100vh;
+        min-height: 100dvh;
         display: grid;
-        align-items: center;
+        align-content: center;
         justify-items: center;
         padding: clamp(32px, 6vh, 56px) 24px;
         text-align: center;
@@ -229,23 +224,20 @@
         position: relative;
         z-index: 3;
         width: min(760px, 100%);
-        margin-top: clamp(170px, 24vh, 230px);
         animation: hero-rise 900ms cubic-bezier(0.16, 1, 0.3, 1) both;
       }
 
       .scroll-trace {
-        position: absolute;
-        z-index: 2;
-        top: clamp(210px, 31vh, 270px);
-        left: 50%;
-        width: min(760px, 88vw);
-        height: min(340px, 36vh);
+        width: min(520px, 82vw);
+        max-height: 32vh;
+        aspect-ratio: 820 / 360;
+        margin: 0 auto clamp(10px, 2.5vh, 28px);
         opacity: 0.7;
-        transform: translate(-50%, -50%);
         pointer-events: none;
       }
 
       .scroll-trace svg {
+        display: block;
         width: 100%;
         height: 100%;
         overflow: visible;
@@ -366,22 +358,9 @@
           padding: max(24px, env(safe-area-inset-top)) 20px max(24px, env(safe-area-inset-bottom));
         }
 
-        .intro-stage {
-          min-height: 100%;
-          height: 100%;
-        }
-
         .scroll-trace {
-          top: clamp(170px, 31vh, 245px);
-          left: 50%;
-          width: min(760px, 88vw);
-          height: min(340px, 36vh);
-          opacity: 0.7;
-        }
-
-        .hero-inner {
-          width: min(760px, 100%);
-          margin-top: clamp(170px, 24vh, 230px);
+          width: min(420px, 86vw);
+          max-height: 28vh;
         }
 
         .hero-title {
@@ -435,14 +414,14 @@
 
       <section class="intro-stage" aria-label="OpenVector introduction">
         <header class="hero">
-          <div class="scroll-trace" aria-hidden="true">
-            <svg viewBox="0 0 1000 560">
-              <path class="infinity-ghost"></path>
-              <path class="infinity-path"></path>
-              <circle class="trace-head" r="5" cx="776" cy="110"></circle>
-            </svg>
-          </div>
           <div class="hero-inner">
+            <div class="scroll-trace" aria-hidden="true">
+              <svg viewBox="90 90 820 360">
+                <path class="infinity-ghost"></path>
+                <path class="infinity-path"></path>
+                <circle class="trace-head" r="5" cx="776" cy="110"></circle>
+              </svg>
+            </div>
             <h1 class="hero-title">Open Vector</h1>
             <p class="tagline">
               The Frontier of Visual Reasoning
