@@ -1,0 +1,639 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>OpenVector</title>
+    <meta
+      name="description"
+      content="OpenVector is a frontier multimodal reliability lab solving VLM hallucination."
+    >
+    <style>
+      :root {
+        --surface: #f7fbff;
+        --surface-low: #f1fbf6;
+        --aqua: #37c9bd;
+        --blue: #3b82f6;
+        --ink: #171827;
+        --muted: rgba(23, 24, 39, 0.78);
+        --line: rgba(23, 24, 39, 0.14);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at 13% 14%, rgba(55, 201, 189, 0.08), transparent 28rem),
+          radial-gradient(circle at 86% 12%, rgba(59, 130, 246, 0.07), transparent 26rem),
+          radial-gradient(circle at 83% 78%, rgba(55, 201, 189, 0.05), transparent 31rem),
+          linear-gradient(180deg, var(--surface) 0%, var(--surface-low) 47%, #fbfdff 100%);
+        font-family: Pilanta, Bahnschrift, "DIN Alternate", "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+        font-size: 18px;
+        line-height: 1.64;
+        letter-spacing: 0.01em;
+        overflow-x: hidden;
+      }
+
+      a {
+        color: inherit;
+        text-decoration-thickness: 1px;
+        text-underline-offset: 4px;
+      }
+
+      .page {
+        position: relative;
+        min-height: 100vh;
+        overflow: hidden;
+      }
+
+      .page::before,
+      .page::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+      }
+
+      .page::before {
+        background:
+          linear-gradient(rgba(23, 24, 39, 0.018) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(23, 24, 39, 0.018) 1px, transparent 1px);
+        background-size: 54px 54px;
+        mask-image: radial-gradient(circle at 50% 34%, black 0%, transparent 66%);
+      }
+
+      .page::after {
+        background:
+          linear-gradient(120deg, transparent 0 41%, rgba(55, 201, 189, 0.035) 41.35% 41.55%, transparent 42%),
+          linear-gradient(20deg, transparent 0 58%, rgba(59, 130, 246, 0.03) 58.25% 58.45%, transparent 59%);
+        opacity: 0.55;
+        mask-image: linear-gradient(180deg, black 0%, transparent 78%);
+      }
+
+      .top-links {
+        position: fixed;
+        z-index: 20;
+        top: 27px;
+        right: clamp(22px, 4vw, 44px);
+        display: flex;
+        gap: 28px;
+        align-items: center;
+        font-size: 14px;
+        letter-spacing: 0.08em;
+      }
+
+      .top-links a {
+        text-decoration: none;
+      }
+
+      .top-links a:hover {
+        text-decoration: underline;
+      }
+
+      .cloud {
+        position: absolute;
+        z-index: 0;
+        width: var(--w);
+        height: calc(var(--w) * 0.42);
+        opacity: var(--o, 1);
+        transform: rotate(var(--r, 0deg));
+        animation: cloud-drift var(--speed, 34s) ease-in-out infinite alternate;
+        pointer-events: none;
+      }
+
+      .cloud::before,
+      .cloud::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
+        background-image: url("data:image/svg+xml,%3Csvg width='520' height='220' viewBox='0 0 520 220' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cg stroke='rgba(55,201,189,0.08)' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M46 56h54M46 56v45M206 56h-54M206 56v45M46 166v-45M46 166h54M206 166v-45M206 166h-54'/%3E%3Cpath d='M285 78h48M285 78v38M458 78h-48M458 78v38M285 176v-38M285 176h48M458 176v-38M458 176h-48'/%3E%3Cpath d='M88 111h76M126 73v76M338 127h68M372 94v67'/%3E%3C/g%3E%3Cg stroke='rgba(59,130,246,0.06)' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='M27 194h153M230 31h113M332 194h152M20 26h70'/%3E%3Ccircle cx='126' cy='111' r='11'/%3E%3Ccircle cx='372' cy='127' r='9'/%3E%3Cpath d='M236 111h32M252 95v32M246 111h12M252 105v12'/%3E%3C/g%3E%3C/svg%3E");
+        animation: cloud-breathe 9s ease-in-out infinite;
+        filter: blur(0.1px);
+      }
+
+      .cloud::after {
+        transform: translate(10px, 8px) scale(0.96);
+        opacity: 0.55;
+      }
+
+      .cloud.one {
+        --w: 315px;
+        --o: 0.2;
+        --r: 8deg;
+        --speed: 39s;
+        --drift-x: 32px;
+        --drift-y: 10px;
+        --tilt: -2deg;
+        top: 34px;
+        left: -25px;
+      }
+
+      .cloud.two {
+        --w: 300px;
+        --o: 0.16;
+        --r: 3deg;
+        --speed: 46s;
+        --drift-x: 42px;
+        --drift-y: -6px;
+        --tilt: 1deg;
+        top: 205px;
+        left: -47px;
+      }
+
+      .cloud.three {
+        --w: 180px;
+        --o: 0.13;
+        --r: -2deg;
+        --speed: 31s;
+        --drift-x: -26px;
+        --drift-y: 8px;
+        --tilt: 2deg;
+        top: 222px;
+        left: 52%;
+      }
+
+      .cloud.four {
+        --w: 278px;
+        --o: 0.15;
+        --r: -1deg;
+        --speed: 37s;
+        --drift-x: 34px;
+        --drift-y: -10px;
+        --tilt: -1deg;
+        top: 472px;
+        left: 9%;
+      }
+
+      .cloud.five {
+        --w: 330px;
+        --o: 0.16;
+        --r: -4deg;
+        --speed: 43s;
+        --drift-x: -38px;
+        --drift-y: 12px;
+        --tilt: 2deg;
+        top: 545px;
+        right: 24%;
+      }
+
+      .cloud.six {
+        --w: 390px;
+        --o: 0.13;
+        --r: 5deg;
+        --speed: 51s;
+        --drift-x: -44px;
+        --drift-y: -8px;
+        --tilt: -2deg;
+        bottom: 70px;
+        right: -20px;
+      }
+
+      .cloud.seven {
+        --w: 245px;
+        --o: 0.12;
+        --r: -7deg;
+        --speed: 35s;
+        --drift-x: 30px;
+        --drift-y: 14px;
+        --tilt: 2deg;
+        top: 1060px;
+        left: -30px;
+      }
+
+      .hero {
+        position: relative;
+        z-index: 2;
+        min-height: 100vh;
+        display: grid;
+        align-items: end;
+        justify-items: center;
+        padding: 124px 24px 42px;
+        text-align: center;
+      }
+
+      .hero-inner {
+        position: relative;
+        z-index: 2;
+        width: min(900px, 100%);
+        animation: hero-rise 900ms cubic-bezier(0.16, 1, 0.3, 1) both;
+      }
+
+      .scroll-trace {
+        position: fixed;
+        z-index: 1;
+        top: 4vh;
+        left: 50%;
+        width: min(1050px, 116vw);
+        height: min(560px, 72vh);
+        opacity: 0.46;
+        transform: translateX(-50%);
+        pointer-events: none;
+      }
+
+      .scroll-trace svg {
+        width: 100%;
+        height: 100%;
+        overflow: visible;
+      }
+
+      .infinity-ghost,
+      .infinity-path {
+        fill: none;
+        stroke-linejoin: round;
+        stroke-linecap: round;
+      }
+
+      .infinity-ghost {
+        stroke: rgba(23, 24, 39, 0.08);
+        stroke-width: 1.5;
+        stroke-dasharray: 2 18;
+      }
+
+      .infinity-path {
+        stroke: rgba(23, 24, 39, 0.42);
+        stroke-width: 2.2;
+        stroke-dasharray: 1;
+        stroke-dashoffset: 1;
+        transition: stroke-dashoffset 80ms linear;
+      }
+
+      .trace-head {
+        fill: rgba(23, 24, 39, 0.5);
+        opacity: 0;
+        transition: opacity 180ms ease;
+      }
+
+      .trace-head.is-visible {
+        opacity: 1;
+      }
+
+      h1 {
+        margin: 0 0 7px;
+        font-size: clamp(48px, 7.3vw, 73px);
+        line-height: 0.98;
+        font-weight: 400;
+        letter-spacing: 0;
+      }
+
+      .tagline {
+        margin: 0 auto;
+        max-width: 920px;
+        color: var(--muted);
+        font-size: clamp(18px, 2.1vw, 24px);
+        line-height: 1.35;
+        font-weight: 600;
+        animation: tagline-appear 900ms cubic-bezier(0.16, 1, 0.3, 1) 180ms both;
+      }
+
+      main {
+        position: relative;
+        z-index: 2;
+        width: min(770px, calc(100% - 40px));
+        margin: 0 auto;
+        padding: 32px 0 96px;
+      }
+
+      p {
+        margin: 0 0 22px;
+      }
+
+      .lead {
+        font-size: 19px;
+      }
+
+      .beliefs {
+        margin: 31px 0 34px;
+        padding: 25px 0 3px;
+        border-top: 1px solid var(--line);
+        border-bottom: 1px solid var(--line);
+      }
+
+      .belief {
+        display: grid;
+        grid-template-columns: 44px 1fr;
+        gap: 20px;
+        margin-bottom: 24px;
+      }
+
+      .belief b {
+        font-size: 15px;
+        letter-spacing: 0.08em;
+      }
+
+      .belief p {
+        margin-bottom: 0;
+      }
+
+      .footnote {
+        margin-top: 40px;
+        padding-top: 18px;
+        border-top: 1px solid var(--line);
+        color: rgba(23, 24, 39, 0.76);
+        font-size: 14px;
+        line-height: 1.55;
+      }
+
+      @keyframes cloud-drift {
+        from {
+          transform: translate3d(0, 0, 0) rotate(var(--r, 0deg));
+        }
+
+        to {
+          transform:
+            translate3d(var(--drift-x, 28px), var(--drift-y, 8px), 0)
+            rotate(calc(var(--r, 0deg) + var(--tilt, 1deg)));
+        }
+      }
+
+      @keyframes cloud-breathe {
+        0%,
+        100% {
+          opacity: 0.74;
+        }
+
+        50% {
+          opacity: 1;
+        }
+      }
+
+      @keyframes hero-rise {
+        from {
+          opacity: 0;
+          transform: translateY(18px);
+        }
+
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes tagline-appear {
+        from {
+          opacity: 0;
+          transform: translateY(9px);
+        }
+
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @media (max-width: 720px) {
+        body {
+          font-size: 16px;
+          line-height: 1.6;
+        }
+
+        .top-links {
+          top: 18px;
+          right: 20px;
+          gap: 20px;
+          font-size: 13px;
+        }
+
+        .hero {
+          min-height: 78vh;
+          padding-bottom: 34px;
+        }
+
+        h1 {
+          font-size: clamp(43px, 14vw, 62px);
+        }
+
+        .tagline {
+          font-size: 18px;
+        }
+
+        .scroll-trace {
+          top: 7vh;
+          left: 47%;
+          width: 122vw;
+          height: 52vh;
+          opacity: 0.38;
+        }
+
+        .belief {
+          grid-template-columns: 1fr;
+          gap: 4px;
+        }
+
+        .cloud.one {
+          left: -125px;
+        }
+
+        .cloud.five {
+          right: -110px;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 1ms !important;
+          animation-iteration-count: 1 !important;
+          scroll-behavior: auto !important;
+        }
+
+        .infinity-path {
+          stroke-dashoffset: 0 !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <nav class="top-links" aria-label="OpenVector links">
+        <a href="https://x.com/openvector" aria-label="OpenVector on X">X</a>
+        <a href="mailto:hi@openvector.ai">Contact</a>
+      </nav>
+
+      <span class="cloud one" aria-hidden="true"></span>
+      <span class="cloud two" aria-hidden="true"></span>
+      <span class="cloud three" aria-hidden="true"></span>
+      <span class="cloud four" aria-hidden="true"></span>
+      <span class="cloud five" aria-hidden="true"></span>
+      <span class="cloud six" aria-hidden="true"></span>
+      <span class="cloud seven" aria-hidden="true"></span>
+
+      <div class="scroll-trace" aria-hidden="true">
+        <svg viewBox="0 0 1000 560">
+          <path class="infinity-ghost"></path>
+          <path class="infinity-path"></path>
+          <circle class="trace-head" r="5" cx="776" cy="110"></circle>
+        </svg>
+      </div>
+
+      <header class="hero">
+        <div class="hero-inner">
+          <h1>OpenVector</h1>
+          <p class="tagline">
+            OpenVector is a frontier multimodal reliability lab solving VLM hallucination.
+          </p>
+        </div>
+      </header>
+
+      <main>
+        <p class="lead">
+          Vision-language models are beginning to read diagrams, inspect claims,
+          guide robots, and reason over video. But they still confidently invent
+          objects, counts, locations, attributes, text, and causal stories that
+          are not actually present in the pixels. That gap is the hallucination
+          problem: language fluency outrunning visual evidence.
+        </p>
+
+        <p>
+          OpenVector exists to close that gap. We are building a verification
+          layer for multimodal AI that forces every answer to carry grounded
+          evidence: the regions seen, the uncertainty measured, the alternative
+          interpretations considered, and the point where the model should say,
+          "I don't know."
+        </p>
+
+        <section class="beliefs" aria-label="OpenVector approach">
+          <div class="belief">
+            <b>01</b>
+            <p>
+              Separate seeing from saying. Our systems first extract a compact
+              evidence graph from images and video, then let language reason only
+              over observations the model can point back to.
+            </p>
+          </div>
+          <div class="belief">
+            <b>02</b>
+            <p>
+              Treat abstention as a product feature. When the visual signal is
+              weak, occluded, ambiguous, or outside distribution, OpenVector
+              returns calibrated uncertainty instead of polished fiction.
+            </p>
+          </div>
+          <div class="belief">
+            <b>03</b>
+            <p>
+              Test against the hard cases. We generate adversarial visual tasks:
+              near-duplicate objects, misleading captions, small text, rotated
+              diagrams, temporal swaps, and scenes where the right answer is no
+              answer.
+            </p>
+          </div>
+        </section>
+
+        <p>
+          Our research combines dense retrieval, object-level attribution,
+          counterfactual image tests, synthetic data curricula, and human audit
+          loops. The goal is not merely to reduce hallucinations on a benchmark;
+          it is to make VLM behavior inspectable enough for high-stakes work in
+          robotics, healthcare operations, manufacturing, insurance, defense,
+          scientific discovery, and enterprise automation.
+        </p>
+
+        <p>
+          We are not chasing a chatbot demo. We are building the boring, exacting
+          substrate that lets multimodal models earn trust: cite the evidence,
+          refuse unsupported claims, and improve when reality disagrees.
+        </p>
+
+        <p>
+          OpenVector is currently working with a small group of design partners
+          who have visual data where mistakes are expensive. If your system needs
+          to know the difference between what a model can describe and what an
+          image actually proves, we would like to talk.
+        </p>
+
+        <p class="footnote" id="footnote-1">
+          1 If your current VLM already refuses every unsupported visual claim,
+          please email <a href="mailto:disagree@openvector.ai">disagree@openvector.ai</a>.
+          We would be delighted to learn what broke our benchmark.
+        </p>
+      </main>
+    </div>
+    <script>
+      (() => {
+        const ghost = document.querySelector(".infinity-ghost");
+        const path = document.querySelector(".infinity-path");
+        const head = document.querySelector(".trace-head");
+        if (!ghost || !path || !head) {
+          return;
+        }
+
+        const buildInfinityPath = () => {
+          const centerX = 500;
+          const centerY = 270;
+          const radiusX = 390;
+          const radiusY = 160;
+          const start = Math.PI / 4;
+          const segments = 260;
+          const points = [];
+
+          for (let index = 0; index <= segments; index += 1) {
+            const t = start - (Math.PI * 2 * index) / segments;
+            const x = centerX + radiusX * Math.sin(t);
+            const y = centerY - radiusY * Math.sin(2 * t);
+            points.push(`${index === 0 ? "M" : "L"} ${x.toFixed(2)} ${y.toFixed(2)}`);
+          }
+
+          return points.join(" ");
+        };
+
+        const infinityPath = buildInfinityPath();
+        ghost.setAttribute("d", infinityPath);
+        path.setAttribute("d", infinityPath);
+
+        const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        const length = path.getTotalLength();
+        path.style.strokeDasharray = length;
+        path.style.strokeDashoffset = length;
+
+        const setProgress = () => {
+          if (prefersReducedMotion) {
+            path.style.strokeDashoffset = 0;
+            head.classList.remove("is-visible");
+            return;
+          }
+
+          const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+          const rawProgress = maxScroll > 0 ? window.scrollY / maxScroll : 0;
+          const progress = Math.min(Math.max(rawProgress, 0), 1);
+          const drawLength = length * progress;
+          path.style.strokeDashoffset = length - drawLength;
+
+          const point = path.getPointAtLength(drawLength);
+          head.setAttribute("cx", point.x);
+          head.setAttribute("cy", point.y);
+          head.classList.toggle("is-visible", progress < 0.995);
+        };
+
+        let ticking = false;
+        const requestUpdate = () => {
+          if (ticking) {
+            return;
+          }
+
+          ticking = true;
+          window.requestAnimationFrame(() => {
+            setProgress();
+            ticking = false;
+          });
+        };
+
+        setProgress();
+        window.addEventListener("scroll", requestUpdate, { passive: true });
+        window.addEventListener("resize", requestUpdate);
+      })();
+    </script>
+  </body>
+</html>
